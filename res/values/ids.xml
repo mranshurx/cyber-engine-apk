@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item type="id" name="checked" />
+    <item type="id" name="control" />
+    <item type="id" name="icon" />
+    <item type="id" name="list" />
+    <item type="id" name="name" />
+    <item type="id" name="search" />
+    <item type="id" name="status" />
+    <item type="id" name="toolbar" />
+    <item type="id" name="btn_tiktok" />
+    <item type="id" name="btn_youtube" />
+    <item type="id" name="btn_wa" />
+    <item type="id" name="logo" />
+    <item type="id" name="btn_continue" />
+    <item type="id" name="status_tiktok" />
+    <item type="id" name="status_youtube" />
+    <item type="id" name="status_wa" />
+    <item type="id" name="tx0" />
+    <item type="id" name="tx1" />
+    <item type="id" name="tx2" />
+    <item type="id" name="tx3" />
+    <item type="id" name="tx4" />
+</resources>

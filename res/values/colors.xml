@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorAccent">#ffff173c</color>
+    <color name="colorPrimary">#ff080a10</color>
+    <color name="colorPrimaryDark">#ff000000</color>
+    <color name="lw_bg">#ff0c0f16</color>
+    <color name="lw_bg_deep">#ff080a10</color>
+    <color name="lw_gray">#ff8b95a6</color>
+    <color name="lw_line">#332a3142</color>
+    <color name="lw_panel">#ff171b27</color>
+    <color name="lw_red">#ffff173c</color>
+    <color name="lw_red_bright">#ffff4d68</color>
+    <color name="lw_red_dim">#66ff173c</color>
+    <color name="lw_red_ghost">#1aff173c</color>
+    <color name="lw_white">#fff2f2f2</color>
+</resources>

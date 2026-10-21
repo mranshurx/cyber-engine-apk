@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_pressed="true">
+        <set>
+            <objectAnimator android:duration="85" android:valueTo="0.975" android:valueType="floatType" android:propertyName="scaleX" />
+            <objectAnimator android:duration="85" android:valueTo="0.975" android:valueType="floatType" android:propertyName="scaleY" />
+            <objectAnimator android:duration="85" android:valueTo="0.88" android:valueType="floatType" android:propertyName="alpha" />
+        </set>
+    </item>
+    <item>
+        <set>
+            <objectAnimator android:duration="115" android:valueTo="1.0" android:valueType="floatType" android:propertyName="scaleX" />
+            <objectAnimator android:duration="115" android:valueTo="1.0" android:valueType="floatType" android:propertyName="scaleY" />
+            <objectAnimator android:duration="115" android:valueTo="1.0" android:valueType="floatType" android:propertyName="alpha" />
+        </set>
+    </item>
+</selector>

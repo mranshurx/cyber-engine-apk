@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout android:background="@drawable/login_background" android:layout_width="fill_parent" android:layout_height="fill_parent"
+  xmlns:android="http://schemas.android.com/apk/res/android">
+    <ScrollView android:clipToPadding="false" android:layout_width="fill_parent" android:layout_height="fill_parent" android:fillViewport="true" android:overScrollMode="never">
+        <FrameLayout android:paddingLeft="22.0dip" android:paddingTop="18.0dip" android:paddingRight="22.0dip" android:paddingBottom="18.0dip" android:clipChildren="false" android:layout_width="fill_parent" android:layout_height="fill_parent" android:minHeight="520.0dip">
+            <FrameLayout android:layout_gravity="center" android:background="@drawable/login_card_premium" android:layout_width="fill_parent" android:layout_height="wrap_content" android:elevation="18.0dip" android:outlineProvider="background" android:clipToOutline="true">
+                <LinearLayout android:gravity="center_horizontal" android:orientation="vertical" android:paddingLeft="20.0dip" android:paddingTop="22.0dip" android:paddingRight="20.0dip" android:paddingBottom="22.0dip" android:layoutAnimation="@anim/login_v28_layout_enter" android:layout_width="fill_parent" android:layout_height="wrap_content">
+                    <FrameLayout android:layout_gravity="center_horizontal" android:background="@drawable/login_logo_frame" android:layout_width="116.0dip" android:layout_height="116.0dip">
+                        <FrameLayout android:layout_gravity="center" android:background="@drawable/login_logo_inner" android:layout_width="88.0dip" android:layout_height="88.0dip" android:elevation="6.0dip" android:outlineProvider="background" android:clipToOutline="true">
+                            <ImageView android:background="@drawable/login_logo_inner" android:layout_width="fill_parent" android:layout_height="fill_parent" android:src="@drawable/proxy_yan_v28_logo" android:scaleType="centerCrop" android:contentDescription="𝐀𝐈𝐌𝐇𝟒𝐂𝐊𝐒" android:outlineProvider="background" android:clipToOutline="true" />
+                        </FrameLayout>
+                    </FrameLayout>
+                    <TextView android:textSize="26.0sp" android:textStyle="bold" android:textColor="#ffffffff" android:gravity="center" android:id="@id/tx3" android:layout_width="fill_parent" android:layout_height="wrap_content" android:layout_marginTop="8.0dip" android:text="𝐀𝐈𝐌𝐇𝟒𝐂𝐊𝐒" android:singleLine="true" android:shadowColor="#80ff2448" android:shadowDx="0.0" android:shadowDy="0.0" android:shadowRadius="14.0" android:letterSpacing="0.06" />
+                    <View android:background="@drawable/stirlax_accent_bar" android:layout_width="64.0dip" android:layout_height="3.0dip" android:layout_marginTop="8.0dip" />
+                    <TextView android:textSize="9.0sp" android:textStyle="bold" android:textColor="#ffd5d9df" android:gravity="center" android:id="@id/status_tiktok" android:background="@drawable/login_badge_premium" android:paddingLeft="14.0dip" android:paddingTop="6.0dip" android:paddingRight="14.0dip" android:paddingBottom="6.0dip" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="14.0dip" android:text="" android:letterSpacing="0.08" />
+                    <FrameLayout android:background="@drawable/login_input_premium" android:layout_width="fill_parent" android:layout_height="54.0dip" android:layout_marginTop="20.0dip" android:elevation="3.0dip">
+                        <LinearLayout android:gravity="center_vertical" android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="fill_parent">
+                            <ImageView android:layout_width="20.0dip" android:layout_height="20.0dip" android:layout_marginLeft="14.0dip" android:src="@drawable/ic_user_fixers" android:contentDescription="Key" android:alpha="0.85" />
+                            <EditText android:textSize="13.0sp" android:textColor="#ffffffff" android:textColorHint="#ff8c939d" android:id="@id/tx4" android:background="@android:color/transparent" android:paddingLeft="10.0dip" android:paddingRight="8.0dip" android:layout_width="0.0dip" android:layout_height="fill_parent" android:hint="Pega tu key" android:singleLine="true" android:layout_weight="1.0" android:inputType="textPassword" />
+                        </LinearLayout>
+                    </FrameLayout>
+                    <FrameLayout android:background="@drawable/login_button_premium" android:layout_width="fill_parent" android:layout_height="52.0dip" android:layout_marginTop="14.0dip" android:elevation="8.0dip">
+                        <Button android:textSize="13.0sp" android:textStyle="bold" android:textColor="#ffffffff" android:id="@id/btn_tiktok" android:background="@android:color/transparent" android:layout_width="fill_parent" android:layout_height="fill_parent" android:text="VALIDAR KEY" android:stateListAnimator="@animator/fixers_button_press" android:letterSpacing="0.08" />
+                    </FrameLayout>
+                    <FrameLayout android:background="@drawable/login_button_secondary" android:layout_width="fill_parent" android:layout_height="48.0dip" android:layout_marginTop="10.0dip" android:elevation="4.0dip">
+                        <Button android:textSize="12.0sp" android:textStyle="bold" android:textColor="#ffe6e9ee" android:id="@id/btn_youtube" android:background="@android:color/transparent" android:layout_width="fill_parent" android:layout_height="fill_parent" android:text="OBTENER KEY GRATIS" android:stateListAnimator="@animator/fixers_button_press" android:letterSpacing="0.06" />
+                    </FrameLayout>
+                    <TextView android:id="@id/btn_wa" android:visibility="gone" android:layout_width="1.0dip" android:layout_height="1.0dip" android:text="" />
+                    <Button android:id="@id/btn_continue" android:visibility="gone" android:layout_width="1.0dip" android:layout_height="1.0dip" android:text="" />
+                </LinearLayout>
+            </FrameLayout>
+        </FrameLayout>
+    </ScrollView>
+</FrameLayout>
