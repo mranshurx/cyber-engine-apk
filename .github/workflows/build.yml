@@ -28,12 +28,17 @@ jobs:
       run: |
         java -jar apktool.jar b . -o modified_unsigned.apk
 
-    - name: Sign APK
+    - name: Sign APK with Uber APK Signer
       run: |
-        java -jar uber-apk-signer.jar --apks modified_unsigned.apk
+        java -jar uber-apk-signer.jar --apks modified_unsigned.apk --out output_apks
+
+    - name: Check Output Files
+      run: |
+        ls -la output_apks/
 
     - name: Upload Built APK Artifact
       uses: actions/upload-artifact@v4
       with:
         name: CYBER-ENGINE-Signed-APK
-        path: modified_unsigned-aligned-signed.apk
+        path: output_apks/*.apk
+        if-no-files-found: error
