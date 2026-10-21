@@ -1,24 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector
-  xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_enabled="false">
-        <shape android:shape="rectangle">
-            <solid android:color="#ff9b9fa8" />
-            <corners android:radius="16.0dip" />
-        </shape>
-    </item>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
-            <gradient android:startColor="#ffc70016" android:endColor="#ff8d0010" android:angle="0.0" />
-            <corners android:radius="16.0dip" />
-            <stroke android:width="1.0dip" android:color="#ffff7888" />
+            <gradient
+                android:angle="270"
+                android:startColor="#FFC42B47"
+                android:centerColor="#FF8C1428"
+                android:endColor="#FF5C0F1C"
+                android:type="linear" />
+            <stroke android:width="2.0dip" android:color="#FFFF5C78" />
+            <corners android:radius="2.0dip" />
         </shape>
     </item>
     <item>
         <shape android:shape="rectangle">
-            <gradient android:startColor="#ffff3855" android:endColor="#ffc70016" android:angle="0.0" android:centerColor="#ffff173c" />
-            <corners android:radius="16.0dip" />
-            <stroke android:width="1.0dip" android:color="#ffff7888" />
+            <gradient
+                android:angle="270"
+                android:startColor="#FFE8425C"
+                android:centerColor="#FFC42B47"
+                android:endColor="#FF7A1526"
+                android:type="linear" />
+            <stroke android:width="2.0dip" android:color="#FFFF3D5C" />
+            <corners android:radius="2.0dip" />
         </shape>
     </item>
 </selector>
