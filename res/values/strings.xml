@@ -24,8 +24,8 @@
     <string name="lw_footer">PRIVATE · LOCAL · SELF-TEST</string>
     <string name="lw_idle">[ IDLE ]</string>
     <string name="lw_linking">[ LINKING··· ]</string>
-    <string name="lw_start">START</string>
-    <string name="lw_stop">STOP</string>
+    <string name="lw_start">START CYBER ENGINE</string>
+    <string name="lw_stop">STOP CYBER ENGINE</string>
     <string name="lw_subtitle">// ONLY HEADSHOT</string>
     <string name="lw_title">CYBER ENGINE</string>
     <string name="lw_wait">···</string>
