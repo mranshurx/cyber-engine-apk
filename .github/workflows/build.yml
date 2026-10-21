@@ -1,24 +1,165 @@
-- name: Prepare signing key
+name: Build and Sign APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+# contents: write is required for the keystore commit-back step
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  KEYSTORE: release.keystore
+  KEY_ALIAS: cyberengine
+  KEY_PASS: mypassword
+  OUT_APK: CYBER-ENGINE-Signed.apk
+  # Keep this above the versionCode already in apktool.yml (currently 13)
+  VERSION_BASE: 1000
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install build tools
         run: |
-          if [ -f release.keystore ] && \
-             keytool -list -keystore release.keystore -storepass mypassword >/dev/null 2>&1; then
-            echo "Keystore OK - reusing committed key."
+          sudo apt-get update
+          sudo apt-get install -y android-sdk-build-tools zipalign apksigner
+
+      - name: Download Apktool
+        run: wget -q https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
+
+      # ------------------------------------------------------------------
+      # KEYSTORE: self-healing. Validates before trusting, regenerates and
+      # reports exactly what was wrong if the committed file is junk.
+      # ------------------------------------------------------------------
+      - name: Prepare signing key (self-healing)
+        id: key
+        run: |
+          usable() {
+            [ -f "$KEYSTORE" ] || return 1
+            [ -s "$KEYSTORE" ] || return 1
+            keytool -list -keystore "$KEYSTORE" -storepass "$KEY_PASS" >/dev/null 2>&1 || return 1
+            keytool -list -keystore "$KEYSTORE" -storepass "$KEY_PASS" -alias "$KEY_ALIAS" >/dev/null 2>&1 || return 1
+            return 0
+          }
+
+          if usable; then
+            echo "Keystore present, readable, alias '$KEY_ALIAS' found - reusing."
+            echo "generated=false" >> "$GITHUB_OUTPUT"
           else
-            if [ -f release.keystore ]; then
-              echo "::warning::release.keystore exists but cannot be opened. Diagnostics:"
-              ls -l release.keystore
-              file release.keystore
-              head -c 60 release.keystore | tr -d '\0' | head -1
+            if [ -f "$KEYSTORE" ]; then
+              echo "::warning::$KEYSTORE exists but is unusable. Diagnostics:"
+              ls -l "$KEYSTORE" || true
+              file "$KEYSTORE" || true
+              echo -n "first bytes: "
+              head -c 60 "$KEYSTORE" | tr -dc '[:print:]' | head -1 || true
+              echo
+              if head -c 2 "$KEYSTORE" | grep -q 'PK'; then
+                echo "::notice::That looks like a ZIP. You committed the artifact zip, not the keystore."
+              fi
             else
-              echo "::warning::No keystore committed - generating a throwaway key."
+              echo "::warning::No keystore committed - generating one and persisting it back."
             fi
-            rm -f release.keystore
+            rm -f "$KEYSTORE"
             keytool -genkeypair -v -noprompt \
-              -keystore release.keystore -storetype PKCS12 \
-              -alias cyberengine -keyalg RSA -keysize 2048 -validity 10000 \
-              -storepass mypassword -keypass mypassword \
+              -keystore "$KEYSTORE" -storetype PKCS12 \
+              -alias "$KEY_ALIAS" -keyalg RSA -keysize 2048 -validity 10000 \
+              -storepass "$KEY_PASS" -keypass "$KEY_PASS" \
               -dname "CN=CyberEngine,OU=Dev,O=Cyber,L=City,ST=State,C=US"
+            echo "generated=true" >> "$GITHUB_OUTPUT"
           fi
+
           echo "--- Certificate fingerprint ---"
-          keytool -list -v -keystore release.keystore -storepass mypassword \
-            | grep -i "SHA256:" || true
+          keytool -list -v -keystore "$KEYSTORE" -storepass "$KEY_PASS" | grep -i "SHA256:" || true
+
+      # Persist a freshly generated key so every later build shares one signature.
+      - name: Commit keystore back
+        if: steps.key.outputs.generated == 'true' && github.ref_type == 'branch'
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          grep -q 'keystore binary' .gitattributes 2>/dev/null || echo '*.keystore binary' >> .gitattributes
+          git add -f "$KEYSTORE" .gitattributes
+          if git diff --cached --quiet; then
+            echo "Nothing to commit."
+          else
+            git commit -m "ci: persist signing keystore [skip ci]"
+            git push origin "HEAD:${GITHUB_REF_NAME}"
+          fi
+
+      # ------------------------------------------------------------------
+      # BUILD
+      # ------------------------------------------------------------------
+      - name: Stamp version
+        run: |
+          sed -i "s/versionCode: .*/versionCode: $((VERSION_BASE + GITHUB_RUN_NUMBER))/" apktool.yml
+          sed -i "s/versionName: .*/versionName: 8.1.${GITHUB_RUN_NUMBER}/" apktool.yml
+          grep -E 'versionCode|versionName' apktool.yml
+
+      # apktool only copies original/META-INF with -c; this makes sure the
+      # vendor 'ygg' cert can never sneak in alongside our own.
+      - name: Drop stale vendor signature
+        run: rm -rf original/META-INF
+
+      - name: Rebuild APK
+        run: java -jar apktool.jar b . --use-aapt2 -o unaligned.apk
+
+      - name: ZipAlign
+        run: zipalign -p -f -v 4 unaligned.apk aligned.apk
+
+      - name: Sign APK (v1 + v2 + v3)
+        run: |
+          apksigner sign \
+            --ks "$KEYSTORE" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass "pass:$KEY_PASS" --key-pass "pass:$KEY_PASS" \
+            --min-sdk-version 24 \
+            --v1-signing-enabled true \
+            --v2-signing-enabled true \
+            --v3-signing-enabled true \
+            --out "$OUT_APK" aligned.apk
+
+      - name: Verify signature
+        run: apksigner verify --verbose --print-certs "$OUT_APK"
+
+      - name: Report
+        run: |
+          ls -lh "$OUT_APK"
+          echo "--- ABI folders ---"
+          unzip -l "$OUT_APK" | grep -o 'lib/[^/]*/' | sort -u || true
+          echo "--- native libs ---"
+          unzip -l "$OUT_APK" | grep '\.so' || true
+          if [ "$(unzip -l "$OUT_APK" | grep -o 'lib/[^/]*/' | sort -u | wc -l)" -lt 2 ]; then
+            echo "::notice::Only one ABI present. 32-bit / x86 devices will fail with NO_MATCHING_ABIS."
+          fi
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: CYBER-ENGINE-Signed-APK
+          path: ${{ env.OUT_APK }}
+          if-no-files-found: error
+
+      - name: Upload keystore copy
+        uses: actions/upload-artifact@v4
+        with:
+          name: signing-keystore
+          path: ${{ env.KEYSTORE }}
+          if-no-files-found: error
