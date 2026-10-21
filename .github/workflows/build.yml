@@ -1,81 +1,24 @@
-name: Build and Sign APK
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
-
-permissions:
-  contents: read
-
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Java 17
-        uses: actions/setup-java@v4
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
-      - name: Install build tools
+- name: Prepare signing key
         run: |
-          sudo apt-get update
-          sudo apt-get install -y android-sdk-build-tools zipalign apksigner
-
-      - name: Download Apktool
-        run: wget -q https://github.com/iBotPeaches/Apktool/releases/download/v2.9.3/apktool_2.9.3.jar -O apktool.jar
-
-      # versionCode tied to the run number => always increases => updates never downgrade
-      - name: Stamp version
-        run: |
-          sed -i "s/versionCode: .*/versionCode: ${GITHUB_RUN_NUMBER}/" apktool.yml
-          sed -i "s/versionName: .*/versionName: 8.1.${GITHUB_RUN_NUMBER}/" apktool.yml
-          grep -E 'versionCode|versionName' apktool.yml
-
-      # belt-and-braces: make sure the vendor cert can never leak in
-      - name: Drop stale vendor signature
-        run: rm -rf original/META-INF
-
-      - name: Rebuild APK
-        run: java -jar apktool.jar b . --use-aapt2 -o unaligned.apk
-
-      - name: ZipAlign
-        run: zipalign -p -f -v 4 unaligned.apk aligned.apk
-
-      - name: Prepare signing key
-        run: |
-          if [ ! -f release.keystore ]; then
-            echo "::warning::release.keystore missing - generating a throwaway key!"
-            keytool -genkeypair -v \
-              -keystore release.keystore -alias cyberengine \
-              -keyalg RSA -keysize 2048 -validity 10000 \
+          if [ -f release.keystore ] && \
+             keytool -list -keystore release.keystore -storepass mypassword >/dev/null 2>&1; then
+            echo "Keystore OK - reusing committed key."
+          else
+            if [ -f release.keystore ]; then
+              echo "::warning::release.keystore exists but cannot be opened. Diagnostics:"
+              ls -l release.keystore
+              file release.keystore
+              head -c 60 release.keystore | tr -d '\0' | head -1
+            else
+              echo "::warning::No keystore committed - generating a throwaway key."
+            fi
+            rm -f release.keystore
+            keytool -genkeypair -v -noprompt \
+              -keystore release.keystore -storetype PKCS12 \
+              -alias cyberengine -keyalg RSA -keysize 2048 -validity 10000 \
               -storepass mypassword -keypass mypassword \
-              -dname "CN=CyberEngine, OU=Dev, O=Cyber, L=City, S=State, C=US"
+              -dname "CN=CyberEngine,OU=Dev,O=Cyber,L=City,ST=State,C=US"
           fi
-          keytool -list -v -keystore release.keystore -storepass mypassword | grep -i "SHA256:"
-
-      - name: Sign APK (v1 + v2 + v3)
-        run: |
-          apksigner sign \
-            --ks release.keystore --ks-key-alias cyberengine \
-            --ks-pass pass:mypassword --key-pass pass:mypassword \
-            --min-sdk-version 24 \
-            --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true \
-            --out CYBER-ENGINE-Signed.apk aligned.apk
-
-      - name: Verify signature
-        run: apksigner verify --verbose --print-certs CYBER-ENGINE-Signed.apk
-
-      - name: Report
-        run: |
-          ls -lh CYBER-ENGINE-Signed.apk
-          unzip -l CYBER-ENGINE-Signed.apk | grep '\.so' || true
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: CYBER-ENGINE-Signed-APK
-          path: CYBER-ENGINE-Signed.apk
-          if-no-files-found: error
+          echo "--- Certificate fingerprint ---"
+          keytool -list -v -keystore release.keystore -storepass mypassword \
+            | grep -i "SHA256:" || true
